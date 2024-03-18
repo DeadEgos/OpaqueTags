@@ -1,0 +1,24 @@
+{
+  "name": "opaque-tags",
+  "version": "1.0.0",
+  "description": "",
+  "main": "background.js",
+  "scripts": {
+    "build:css": "tailwindcss -i src/app.css -o dist/app.css --minify",
+    "build:js": "esbuild src/app.js --bundle --outfile=dist/app.js",
+    "build": "npm run build:js && npm run build:css",
+    "watch:css": "tailwindcss -i src/app.css -o dist/app.css --watch",
+    "watch": "npm run watch:css & esbuild src/app.js --bundle --outfile=dist/app.js --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^10.4.18",
+    "postcss": "^8.4.36",
+    "tailwindcss": "^3.4.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.2"
+  }
+}
