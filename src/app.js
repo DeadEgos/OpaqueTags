@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function checkBookmarkStatus() {
         const currentUrl = document.getElementById('urlField').value; // Assuming this is your input field
-        
+    
         const transaction = db.transaction(["bookmarks"], "readonly");
         const objectStore = transaction.objectStore("bookmarks");
         const request = objectStore.get(currentUrl);
@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function toggleBookmark() {
         const currentUrl = document.getElementById('urlField').value; // Assuming this is your input field
         const currentTitle = document.getElementById('titleField').value;
+        const currentTags = document.getElementById('tagsField').value.split(',').map(tag => tag.trim()); // Split tags by comma and trim spaces
 
         const transaction = db.transaction(["bookmarks"], "readwrite");
         const objectStore = transaction.objectStore("bookmarks");
@@ -100,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
             } else {
                 // URL is not bookmarked, add it
-                objectStore.add({ url: currentUrl , title: currentTitle}).onsuccess = function () {
+                objectStore.add({ url: currentUrl , title: currentTitle, tags: currentTags}).onsuccess = function () {
                     // Update UI to reflect addition
                     document.getElementById('saveButton').textContent = "URL is Saved";
                     // svgIcon.classList.remove('hidden');
@@ -108,6 +109,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
     }
+
+    // app.js - Inside your DOMContentLoaded event listener or similar initialization function
+    chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+        if (message.type === 'metaKeywords') {
+            console.log('Keywords:', message.keywords);
+            // Do something with the keywords, like displaying them in the popup
+            document.getElementById('tagsField').value = message.keywords; // Example usage
+        }
+    });
+
+    // Trigger content script to send meta tag data when the popup is opened
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {type: 'fetchMetaTags'});
+    });
+
+    // Request meta tags from the content script when the popup is loaded
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {action: "getMetaTags"});
+    });
+
+
 
 });
 
