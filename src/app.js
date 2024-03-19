@@ -1,3 +1,27 @@
+
+document.addEventListener('DOMContentLoaded', function () {
+    getCurrentTabUrl(function (url, title) { renderPageDetails(url, title); });
+
+    openDB();
+
+    chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+        if (message.type === 'metaKeywords') {
+            document.getElementById('tagsField').value = message.keywords;
+        }
+    });
+    
+    // Trigger content script to send meta tag data when the popup is opened
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'fetchMetaTags' });
+        chrome.tabs.sendMessage(tabs[0].id, { action: "getMetaTags" });
+    });
+
+    saveButton.addEventListener('click', toggleBookmark)
+
+    // Example: Listen for a click in the popup and open the full-window view
+    document.getElementById('openFullViewButton').addEventListener('click', openFullWindowView);
+});
+
 let db;
 
 function getCurrentTabUrl(callback) {
@@ -42,31 +66,35 @@ function openDB() {
 }
 
 function checkBookmarkStatus() {
-    const currentUrl = document.getElementById('urlField').value; // Assuming this is your input field
-
+    const currentUrl = document.getElementById('urlField').value;
     const transaction = db.transaction(["bookmarks"], "readonly");
     const objectStore = transaction.objectStore("bookmarks");
     const request = objectStore.get(currentUrl);
 
     request.onsuccess = function (event) {
         const result = event.target.result;
-        const saveButton = document.getElementById('saveButton'); // Your button's ID
-        // const svgIcon = document.getElementById('svgIcon'); // Get the SVG icon span
+        const buttonText = document.getElementById('buttonText');
+        const svgIcon = document.getElementById('svgIcon');
+        const saveButton = document.getElementById('saveButton');
 
         if (result) {
             // URL is bookmarked
-            saveButton.textContent = "URL is Saved"; // Update button text or state
-            // svgIcon.classList.remove('hidden');
+            buttonText.textContent = "URL is Saved";
+            svgIcon.classList.remove('hidden');
+            saveButton.classList.add('bg-green-500', 'hover:bg-green-600');
+            saveButton.classList.renove('bg-blue-500', 'hover:bg-blue-600');
         } else {
             // URL is not bookmarked
-            saveButton.textContent = "Save URL"; // Update button text or state
-            // svgIcon.classList.add('hidden'); 
+            buttonText.textContent = "Save URL";
+            svgIcon.classList.add('hidden');
+            saveButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+            saveButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
         }
     };
 }
 
 function toggleBookmark() {
-    const currentUrl = document.getElementById('urlField').value; // Assuming this is your input field
+    const currentUrl = document.getElementById('urlField').value;
     const currentTitle = document.getElementById('titleField').value;
     const currentTags = document.getElementById('tagsField').value.split(',').map(tag => tag.trim()); // Split tags by comma and trim spaces
 
@@ -80,49 +108,20 @@ function toggleBookmark() {
             // URL is bookmarked, remove it
             objectStore.delete(currentUrl).onsuccess = function () {
                 // Update UI to reflect removal
-                document.getElementById('saveButton').textContent = "Save URL";
-                // svgIcon.classList.add('hidden');
-
+                document.getElementById('buttonText').textContent = "Save URL";
+                document.getElementById('svgIcon').classList.add('hidden');
+                document.getElementById('saveButton').classList.remove('bg-green-500', 'hover:bg-green-600');
+                document.getElementById('saveButton').classList.add('bg-blue-500', 'hover:bg-blue-600');
             };
         } else {
             // URL is not bookmarked, add it
             objectStore.add({ url: currentUrl, title: currentTitle, tags: currentTags }).onsuccess = function () {
                 // Update UI to reflect addition
-                document.getElementById('saveButton').textContent = "URL is Saved";
-                // svgIcon.classList.remove('hidden');
+                document.getElementById('buttonText').textContent = "URL is Saved";
+                document.getElementById('svgIcon').classList.remove('hidden');
+                document.getElementById('saveButton').classList.add('bg-green-500', 'hover:bg-green-600');
+                document.getElementById('saveButton').classList.remove('bg-blue-500', 'hover:bg-blue-600');
             };
         }
     };
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-    // Fetch and display the URL
-    getCurrentTabUrl(function (url, title) {
-        renderPageDetails(url, title);
-    });
-
-    openDB();
-    
-    chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-        if (message.type === 'metaKeywords') {
-            console.log('Keywords:', message.keywords);
-            // Do something with the keywords, like displaying them in the popup
-            document.getElementById('tagsField').value = message.keywords; // Example usage
-        }
-    });
-
-    // Trigger content script to send meta tag data when the popup is opened
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'fetchMetaTags' });
-    });
-
-    // Request meta tags from the content script when the popup is loaded
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: "getMetaTags" });
-    });
-
-    saveButton.addEventListener('click', toggleBookmark)
-
-    // Example: Listen for a click in the popup and open the full-window view
-    document.getElementById('openFullViewButton').addEventListener('click', openFullWindowView);
-});
