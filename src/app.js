@@ -126,4 +126,3 @@ document.addEventListener('DOMContentLoaded', function () {
     // Example: Listen for a click in the popup and open the full-window view
     document.getElementById('openFullViewButton').addEventListener('click', openFullWindowView);
 });
-
