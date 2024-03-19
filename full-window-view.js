@@ -40,14 +40,12 @@ document.addEventListener('DOMContentLoaded', function () {
     bookmarksList.innerHTML = ''; // Clear existing content
 
     bookmarks.forEach(bookmark => {
-      const listItem = document.createElement('li');
-      const link = document.createElement('a');
-      link.href = bookmark.url;
-      link.textContent = bookmark.url; // Set the link text or use a title if available
-      link.target = "_blank"; // Open in new tab
-
-      listItem.appendChild(link);
-      bookmarksList.appendChild(listItem);
+      const row = 
+      `<tr>
+        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-zinc-800 dark:text-zinc-200 sm:pl-0">${bookmark.title}</td>
+        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-zinc-800 dark:text-zinc-200 sm:pl-0"><a href="${bookmark.url}">${bookmark.url}</a></td>
+      </tr>`;
+      bookmarksList.innerHTML = bookmarksList.innerHTML.concat(row);
     });
 
     if (bookmarks.length === 0) {

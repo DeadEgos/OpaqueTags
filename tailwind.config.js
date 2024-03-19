@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     './src/**/*.js',
+    'full-window-view.js',
     'popup.html',
     'full-window-view.html',
     'sidebar.html'
