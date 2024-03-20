@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "OpaqueTags",
   "version": "0.0.1",
-  "description": "Keep your private things private.",
+  "description": "A simple private indexdb for your links",
   "permissions": [
     "storage",
     "tabs",
