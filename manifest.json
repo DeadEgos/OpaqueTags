@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "OpaqueTags",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple private indexdb for your links",
   "permissions": [
     "storage",
